@@ -42,8 +42,6 @@ func main() {
 		case "POST":
 			fmt.Fprint(writer,"创建新的文章")
 		}
-
-
 	})
 
 	http.ListenAndServe(":3000", router)
