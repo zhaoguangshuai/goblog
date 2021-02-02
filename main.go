@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+var router = mux.NewRouter()
 func homeHandler(w http.ResponseWriter, r *http.Request)  {
 	//w.Header().Set("Content-Type","text/html;charset=utf-8")
 	fmt.Fprint(w,"<h1>hello，欢迎来到goblog！</h1>")
@@ -61,8 +62,28 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 	})
 }
 
+func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
+	html := `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>创建文章 —— 我的技术博客</title>
+</head>
+<body>
+   <form action="/articles" method="post">
+       <p><input type="text" name="title"></p>
+       <p><textarea name="body" cols="30" rows="10"></textarea></p>
+       <p><button type="submit">提交</button></p>
+   </form>
+</body>
+</html>
+`
+	//storeURL, _ := router.Get("articles.store").URL()
+	fmt.Fprintf(w, html)
+	//fmt.Fprintf(w, html,storeURL)
+}
+
 func main() {
-	router := mux.NewRouter()
 
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 
@@ -74,18 +95,13 @@ func main() {
 
 	router.HandleFunc("/articles",articlesStoreHandler).Methods("POST").Name("articles.shore")
 
+	router.HandleFunc("/articles/create",articlesCreateHandler).Methods("GET").Name("articles.create")
+
 	//自定义404页面
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	//中间件：强制内容类型为HTML
 	router.Use(forceHTMLMiddleware)
-
-	//通过命名路由获取 URL 事例
-	homeURL,_ := router.Get("home").URL()
-	fmt.Println(homeURL)
-	articleURL,_ := router.Get("articles.show").URL("id","23")
-	fmt.Println(articleURL)
-
 
 	http.ListenAndServe(":3000", removeTrailingSlash(router))
 
