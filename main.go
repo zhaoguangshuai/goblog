@@ -1,16 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
 var router = mux.NewRouter()
+var db *sql.DB
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type","text/html;charset=utf-8")
@@ -124,8 +129,44 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w,data)
 }
 
-func main() {
+func initDB()  {
+	var err error
+	config := mysql.Config{
+		User:			"root",
+		Passwd:			"zgs8653406",
+		Addr:			"127.0.0.1:3306",
+		Net: 			"tcp",
+		DBName: 		"goblog",
+		AllowNativePasswords: true,
+	}
 
+	//准备连接数据库
+	db,err = sql.Open("mysql",config.FormatDSN())
+	checkError(err)
+	//fmt.Println(config.FormatDSN())
+	//fmt.Println(db)
+
+	//设置最大连接数
+	db.SetMaxOpenConns(25)
+	//设置最大空闲连接数
+	db.SetMaxIdleConns(25)
+	//设置每个连接的过期时间
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	//尝试连接，失败会报错
+	err = db.Ping()
+	checkError(err)
+
+}
+
+func checkError(err error)  {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	initDB()
 	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
 
 	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
