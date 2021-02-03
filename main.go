@@ -73,6 +73,16 @@ type Article struct {
 	ID			int64
 }
 
+//Link 方法用来生成文章链接
+func (a Article) Link() string {
+	showURL,err := router.Get("articles.show").URL("id",strconv.FormatInt(a.ID,10))
+	if err != nil {
+		checkError(err)
+		return  ""
+	}
+	return showURL.String()
+}
+
 func articlesEditHandler(w http.ResponseWriter,r *http.Request)  {
 	//1.获取url参数
 	id := getRouteVariable("id",r)
@@ -201,7 +211,31 @@ func getArticleByID(id string) (Article,error) {
 
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "访问文章列表11")
+	//1. 执行查询语句，返回一个结果集
+	rows,err := db.Query("select * from articles")
+	checkError(err)
+	defer rows.Close()
+
+	var articles []Article
+	//2.循环读取结果
+	for rows.Next() {
+		var article Article
+		//2.1 扫码每一行的结果并赋值到一个 article 对象中
+		err := rows.Scan(&article.ID, &article.Title,&article.Body)
+		checkError(err)
+		//2.2 将article追加到articles 的这个数组中
+		articles = append(articles,article)
+	}
+	//2.3 检查遍历时是否发生错误
+	err = rows.Err()
+	checkError(err)
+
+	//3.加载模版
+	tmpl,err := template.ParseFiles("resources/views/articles/index.gohtml")
+	checkError(err)
+	//4.渲染模版，将所有文章的数据传输进去
+	tmpl.Execute(w,articles)
+
 }
 
 //ArticlesFormData 创建博文表单数据
