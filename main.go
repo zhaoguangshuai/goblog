@@ -66,8 +66,9 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		//4.读取成功
-		fmt.Fprint(w,"文章标题"+article.Title,"文章内容"+article.Body)
-		fmt.Fprint(w,"读取成功，文章标题--"+article.Title)
+		tmpl,err := template.ParseFiles("resources/views/articles/show.gohtml")
+		checkError(err)
+		tmpl.Execute(w,article)
 	}
 
 }
