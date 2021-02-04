@@ -75,6 +75,7 @@ func (* ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 type ArticlesFormData struct {
 	Title,Body		string
 	URL				string
+	Id				int64
 	Errors			map[string]string
 }
 
@@ -144,4 +145,104 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 		tmpl.Execute(w, data)
 	}
 }
+
+// Edit 文章更新页面
+func (*ArticlesController) Edit(w http.ResponseWriter,r *http.Request)  {
+	//1.获取url参数
+	id := route.GetRouteVariable("id",r)
+
+	//2.读取对应的文章数据
+	article,err := article.Get(id)
+
+	//3. 如果出现错误
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			//3.1 数据为找到
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w,"404 文章未找到")
+		} else {
+			//3.2 数据库错误
+			logger.LogError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w,"500 服务器内部错误")
+		}
+	} else {
+		//将字符串转化为int64
+		id1,_ := strconv.ParseInt(id,10,64)
+		data := ArticlesFormData{
+			Title: 			article.Title,
+			Body: 			article.Body,
+			Id: 			id1,
+			Errors: 		nil,
+		}
+		tmpl,err := template.ParseFiles("resources/views/articles/edit.gohtml")
+		logger.LogError(err)
+
+		tmpl.Execute(w,data)
+	}
+}
+
+func (*ArticlesController) Update(w http.ResponseWriter,r *http.Request)  {
+	//1.获取URL参数
+	id := route.GetRouteVariable("id",r)
+
+	//获取对应的文章数据
+	_article,err := article.Get(id)
+
+	//3.如果出现错误
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			//3.1数据未找到
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w,"404 文章未找到")
+		} else {
+			//3.2 数据库错误
+			logger.LogError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w,"500 服务器内部错误")
+		}
+	} else {
+		//4. 未出现错误
+
+		//4.1 表单验证
+		title := r.PostFormValue("title")
+		body := r.PostFormValue("body")
+
+		errors := validateArticleFormData(title,body)
+
+		if len(errors) == 0 {
+			//4.2 表单验证通过，更新数据
+			_article.Title = title
+			_article.Body = body
+			rowsAffected,err := _article.Update()
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w,"500 服务器内部错误")
+				return
+			}
+
+			//更新成功，跳转到文章详情页
+			if rowsAffected > 0 {
+				http.Redirect(w,r,"/articles/"+id,http.StatusFound)
+			} else {
+				fmt.Fprint(w,"您没有做任何更改!")
+			}
+		} else {
+			//4.3 表单验证不通过，显示理由
+			id1,_ := strconv.ParseInt(id,10,64)
+			data := ArticlesFormData{
+				Title: title,
+				Body: body,
+				Id: id1,
+				Errors: errors,
+			}
+			tmpl,err := template.ParseFiles("resources/views/articles/edit.gohtml")
+			logger.LogError(err)
+			tmpl.Execute(w,data)
+		}
+	}
+
+}
+
 
