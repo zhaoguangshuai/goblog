@@ -368,6 +368,7 @@ func main() {
 
 	//route.Initialize()
 	//router = route.Router
+	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
