@@ -5,9 +5,10 @@ import (
 	"net/http"
 )
 
-//router 路由对象
+//router 定义路由对象，并没有赋值
 var route *mux.Router
 
+//初始化路由对象 ， 可以理解为赋值
 func SetRoute(r *mux.Router)  {
 	route = r
 }
