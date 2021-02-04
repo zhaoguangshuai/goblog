@@ -4,6 +4,7 @@ import (
 	"goblog/pkg/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 // DB gorm.DB 对象
@@ -17,7 +18,9 @@ func ConnectDB() *gorm.DB {
 	})
 
 	//准备数据库连接池
-	DB,err = gorm.Open(config,&gorm.Config{})
+	DB,err = gorm.Open(config,&gorm.Config{
+		Logger: gormlogger.Default.LogMode(gormlogger.Warn),
+	})
 
 	logger.LogError(err)
 

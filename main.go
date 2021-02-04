@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
@@ -15,23 +16,13 @@ import (
 	"unicode/utf8"
 )
 
-var router = route.Router
+var router *mux.Router
 var db *sql.DB
 
 //Article 对应一条文章数据
 type Article struct {
 	Title,Body  string
 	ID			int64
-}
-
-//Link 方法用来生成文章链接
-func (a Article) Link() string {
-	showURL,err := router.Get("articles.show").URL("id",strconv.FormatInt(a.ID,10))
-	if err != nil {
-		logger.LogError(err)
-		return  ""
-	}
-	return showURL.String()
 }
 
 func articlesEditHandler(w http.ResponseWriter,r *http.Request)  {
@@ -152,35 +143,6 @@ func getArticleByID(id string) (Article,error) {
 	query := "select * from articles where id = ?"
 	err := db.QueryRow(query,id).Scan(&article.ID,&article.Title,&article.Body)
 	return article,err
-}
-
-
-func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	//1. 执行查询语句，返回一个结果集
-	rows,err := db.Query("select * from articles")
-	logger.LogError(err)
-	defer rows.Close()
-
-	var articles []Article
-	//2.循环读取结果
-	for rows.Next() {
-		var article Article
-		//2.1 扫码每一行的结果并赋值到一个 article 对象中
-		err := rows.Scan(&article.ID, &article.Title,&article.Body)
-		logger.LogError(err)
-		//2.2 将article追加到articles 的这个数组中
-		articles = append(articles,article)
-	}
-	//2.3 检查遍历时是否发生错误
-	err = rows.Err()
-	logger.LogError(err)
-
-	//3.加载模版
-	tmpl,err := template.ParseFiles("resources/views/articles/index.gohtml")
-	logger.LogError(err)
-	//4.渲染模版，将所有文章的数据传输进去
-	tmpl.Execute(w,articles)
-
 }
 
 //ArticlesFormData 创建博文表单数据
@@ -370,8 +332,6 @@ func main() {
 	//router = route.Router
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
-
-	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.shore")
 
