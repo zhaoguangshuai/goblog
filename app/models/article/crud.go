@@ -33,11 +33,22 @@ func (article *Article) Create() (err error) {
 	return nil
 }
 
-func (article *Article) Update() (rowsAffected int64,err error) {
+//Update 修改文章信息
+func (article *Article) Update() (rowsAffected int64, err error) {
 	result := model.DB.Save(&article)
 	if err = result.Error; err != nil {
 		logger.LogError(err)
 		return 0, err
 	}
-	return result.RowsAffected,nil
+	return result.RowsAffected, nil
+}
+
+// delete 删除文章
+func (article *Article) Delete() (rowsAffected int64, err error) {
+	result := model.DB.Delete(&article)
+	if err = result.Error; err != nil {
+		logger.LogError(err)
+		return 0, err
+	}
+	return result.RowsAffected, nil
 }
