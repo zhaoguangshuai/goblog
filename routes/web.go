@@ -9,13 +9,13 @@ import (
 
 func RegisterWebRoutes(r *mux.Router)  {
 	//静态页面
-	pc := new(controllers.PagesController)
+	pc := new(controllers.PagesController)//获取结构体对象，调用里面的方法
 	r.HandleFunc("/", pc.Home).Methods("GET").Name("home")
 	r.HandleFunc("/about",pc.About).Methods("GET").Name("about")
 	r.NotFoundHandler = http.HandlerFunc(pc.NotFound)
 
 	//文章相关页面
-	ac := new(controllers.ArticlesController)
+	ac := new(controllers.ArticlesController)//获取结构体对象，调用里面的方法
 	r.HandleFunc("/articles/{id:[0-9]+}", ac.Show).Methods("GET").Name("articles.show")
 
 	r.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
