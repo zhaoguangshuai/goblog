@@ -42,12 +42,32 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//4.读取成功
 		//tmpl,err := template.ParseFiles("resources/views/articles/show.gohtml")
-		tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{
-			"RouteName2URL": route.Name2URL,
-			"Int64ToString": types.Int64ToString,
-		}).ParseFiles("resources/views/articles/show.gohtml")
+		//tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{
+		//	"RouteName2URL": route.Name2URL,
+		//	"Int64ToString": types.Int64ToString,
+		//}).ParseFiles("resources/views/articles/show.gohtml")
+		//logger.LogError(err)
+		//tmpl.Execute(w, article)
+		//4.0 设置模版相对路径
+		viewDir := "resources/views"
+
+		//4.1 所有布局模版文件 slice
+		files,err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
-		tmpl.Execute(w, article)
+
+		//4.2 在slice 里新增我们的目标文件
+		newFiles := append(files,viewDir+"/articles/show.gohtml")
+
+		// 4.3 解析模板文件
+		tmpl, err := template.New("show.gohtml").
+			Funcs(template.FuncMap{
+				"RouteName2URL": route.Name2URL,
+				"Int64ToString": types.Int64ToString,
+			}).ParseFiles(newFiles...)
+		logger.LogError(err)
+
+		//4.4 渲染模版，见所有的文章的数据传输进去
+		tmpl.ExecuteTemplate(w,"app",article)
 	}
 }
 
