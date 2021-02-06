@@ -7,9 +7,7 @@ import (
 	"goblog/pkg/route"
 	"goblog/pkg/view"
 	"gorm.io/gorm"
-	"html/template"
 	"net/http"
-	"strconv"
 	"unicode/utf8"
 )
 
@@ -40,7 +38,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		//4.读取成功
-		view.Render(w,"articles.show",article)
+		view.Render(w,article,"articles.show")
 	}
 }
 
@@ -57,7 +55,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
 		//2.加载模版
-		view.Render(w,"articles.index",articles)
+		view.Render(w,articles,"articles.index")
 	}
 
 }
@@ -65,22 +63,12 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 // ArticlesFormData 创建博文表单数据
 type ArticlesFormData struct {
 	Title, Body string
-	URL         string
-	Id          int64
+	Article 	article.Article
 	Errors      map[string]string
 }
 
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
-	data := ArticlesFormData{
-		Title:  "",
-		Body:   "",
-		Errors: nil,
-	}
-	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-	if err != nil {
-		panic(err)
-	}
-	tmpl.Execute(w, data)
+	view.Render(w,ArticlesFormData{},"articles.create","_form_field")
 }
 
 func validateArticleFormData(title string, body string) map[string]string {
@@ -124,16 +112,11 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "创建文章失败，请联系管理员")
 		}
 	} else {
-		data := ArticlesFormData{
-			Title:  title,
-			Body:   body,
+		view.Render(w,ArticlesFormData{
+			Title: title,
+			Body: body,
 			Errors: errors,
-		}
-		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-
-		logger.LogError(err)
-
-		tmpl.Execute(w, data)
+		},"articles.create","articles._form_field")
 	}
 }
 
@@ -143,7 +126,7 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 	id := route.GetRouteVariable("id", r)
 
 	//2.读取对应的文章数据
-	article, err := article.Get(id)
+	_article, err := article.Get(id)
 
 	//3. 如果出现错误
 	if err != nil {
@@ -158,18 +141,13 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
-		//将字符串转化为int64
-		id1, _ := strconv.ParseInt(id, 10, 64)
-		data := ArticlesFormData{
-			Title:  article.Title,
-			Body:   article.Body,
-			Id:     id1,
+		//4.读取成功，显示编辑文章表单
+		view.Render(w,ArticlesFormData{
+			Title: _article.Title,
+			Body: _article.Body,
+			Article: _article,
 			Errors: nil,
-		}
-		tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-		logger.LogError(err)
-
-		tmpl.Execute(w, data)
+		}, "articles.edit", "articles._form_field")
 	}
 }
 
@@ -222,16 +200,12 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			//4.3 表单验证不通过，显示理由
-			id1, _ := strconv.ParseInt(id, 10, 64)
-			data := ArticlesFormData{
-				Title:  title,
-				Body:   body,
-				Id:     id1,
+			view.Render(w,ArticlesFormData{
+				Title: title,
+				Body: body,
+				Article: _article,
 				Errors: errors,
-			}
-			tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-			logger.LogError(err)
-			tmpl.Execute(w, data)
+			}, "articles.edit", "articles._form_field")
 		}
 	}
 
