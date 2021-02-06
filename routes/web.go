@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// RegisterWebRoutes 注册网页相关路由
 func RegisterWebRoutes(r *mux.Router)  {
 	//静态页面
 	pc := new(controllers.PagesController)//获取结构体对象，调用里面的方法
@@ -30,6 +31,12 @@ func RegisterWebRoutes(r *mux.Router)  {
 
 
 	r.HandleFunc("/articles/{id:[0-9]+}/delete",ac.Delete).Methods("POST").Name("articles.delete")
+
+
+	//用户认证
+	auc := new(controllers.AuthController)
+	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
+	r.HandleFunc("/auth/do-register",auc.DoRegister).Methods("POST").Name("auth.doregister")
 
 
 	//静态资源
