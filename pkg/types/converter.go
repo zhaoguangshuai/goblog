@@ -17,3 +17,7 @@ func StringToInt(str string) int {
 	}
 	return i
 }
+// Uint64ToString 将 uint64 转换为 string
+func Uint64ToString(num uint64) string {
+	return strconv.FormatUint(num,10)
+}
