@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"goblog/app/models/article"
-	"goblog/app/requests"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/view"
@@ -78,9 +77,9 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//2. 表单验证
-	errors := requests.ValidateArticleForm(_article)
+	//errors := requests.ValidateArticleForm(_article)
 	// 检查是否有错误
-	if len(errors) == 0 {
+	//if len(errors) == 0 {
 		_article.Create()
 		if _article.ID > 0 {
 			indexURL := route.Name2URL("articles.show", "id",_article.GetStringID())
@@ -89,12 +88,12 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "创建文章失败，请联系管理员")
 		}
-	} else {
-		view.Render(w,view.D{
-			"Article":_article,
-			"Errors": errors,
-		},"articles.create","articles._form_field")
-	}
+	//} else {
+	//	view.Render(w,view.D{
+	//		"Article":_article,
+	//		"Errors": errors,
+	//	},"articles.create","articles._form_field")
+	//}
 }
 
 // Edit 文章更新页面
@@ -153,9 +152,9 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		_article.Title = r.PostFormValue("title")
 		_article.Body = r.PostFormValue("body")
 
-		errors := requests.ValidateArticleForm(_article)
+		//errors := requests.ValidateArticleForm(_article)
 
-		if len(errors) == 0 {
+		//if len(errors) == 0 {
 			//4.2 表单验证通过，更新数据
 			rowsAffected, err := _article.Update()
 
@@ -172,13 +171,13 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 			} else {
 				fmt.Fprint(w, "您没有做任何更改!")
 			}
-		} else {
-			//4.3 表单验证不通过，显示理由
-			view.Render(w,view.D{
-				"Article": _article,
-				"Errors": errors,
-			}, "articles.edit", "articles._form_field")
-		}
+		//} else {
+		//	//4.3 表单验证不通过，显示理由
+		//	view.Render(w,view.D{
+		//		"Article": _article,
+		//		"Errors": errors,
+		//	}, "articles.edit", "articles._form_field")
+		//}
 	}
 
 }
