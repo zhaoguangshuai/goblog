@@ -36,11 +36,16 @@ func RegisterWebRoutes(r *mux.Router)  {
 
 	//用户认证
 	auc := new(controllers.AuthController)
+	//注册
 	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
 	r.HandleFunc("/auth/do-register",auc.DoRegister).Methods("POST").Name("auth.doregister")
 
+	//登陆
 	r.HandleFunc("/auth/login",auc.Login).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/dologin",auc.DoLogin).Methods("POST").Name("auth.dologin")
+
+	//退出登陆
+	r.HandleFunc("/auth/logout",auc.Logout).Methods("POST").Name("auth.logout")
 
 	//静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
