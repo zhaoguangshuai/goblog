@@ -47,6 +47,12 @@ func RegisterWebRoutes(r *mux.Router)  {
 	//退出登陆
 	r.HandleFunc("/auth/logout",middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
+
+	//用户认证
+	uc := new(controllers.UserController)
+	r.HandleFunc("/users/{id:[0-9]+}",uc.Show).Methods("GET").Name("users.show")
+
+
 	//静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public/")))
