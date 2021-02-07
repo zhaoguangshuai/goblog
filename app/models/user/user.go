@@ -21,3 +21,8 @@ func (u User) ComparePassword(_password string) bool {
 	//return u.Password == password
 	return password.CheckHash(_password,u.Password)
 }
+
+//Link 方法用来生成用户链接
+func (u User) Link() string {
+	return ""
+}
