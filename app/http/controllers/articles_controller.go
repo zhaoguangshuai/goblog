@@ -5,9 +5,11 @@ import (
 	"goblog/app/models/article"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
+	"goblog/pkg/session"
 	"goblog/pkg/view"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 // ArticlesController 文章相关页面
@@ -71,9 +73,12 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 	//1. 初始化数据
+	user_id,_ := strconv.ParseUint(session.Get("uid").(string),10,64)
+	fmt.Println(user_id)
 	_article := article.Article{
 		Title: r.PostFormValue("title"),
 		Body: r.PostFormValue("body"),
+		UserID: user_id,
 	}
 
 	//2. 表单验证
