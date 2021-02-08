@@ -4,6 +4,7 @@ import (
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
 	"goblog/pkg/types"
+	"net/http"
 )
 // Get 通过 ID 获取文章
 func Get(idstr string) (Article, error) {
@@ -61,6 +62,15 @@ func GetByUserID(uid string) ([]Article,error) {
 	}
 	return articles,nil
 
+}
+
+//GetByCategoryID 获取分类相关的文章
+func GetByCategoryID(cid string,r *http.Request) ([]Article,error) {
+	var articles []Article
+	if err := model.DB.Preload("User").Where("category_id = ?", cid).Find(&articles).Error; err != nil {
+		return articles, err
+	}
+	return articles,nil
 }
 
 
