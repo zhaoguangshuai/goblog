@@ -12,3 +12,12 @@ func (Category *Category) Create() (err error) {
 	}
 	return nil
 }
+
+//all 获取分类数据
+func All() ([]Category,error) {
+	var categories []Category
+	if err := model.DB.Find(&categories).Error;err != nil {
+		return categories,err
+	}
+	return categories,nil
+}
