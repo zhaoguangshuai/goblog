@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"goblog/app/models/article"
 	"goblog/app/policies"
+	"goblog/pkg/auth"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
-	"goblog/pkg/session"
 	"goblog/pkg/view"
 	"net/http"
-	"strconv"
 )
 
 // ArticlesController 文章相关页面
@@ -65,8 +64,8 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 	//1. 初始化数据
-	user_id,_ := strconv.ParseUint(session.Get("uid").(string),10,64)
-	fmt.Println(user_id)
+	//user_id,_ := strconv.ParseUint(session.Get("uid").(string),10,64)
+	user_id := auth.User().ID
 	_article := article.Article{
 		Title: r.PostFormValue("title"),
 		Body: r.PostFormValue("body"),
