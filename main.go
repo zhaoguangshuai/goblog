@@ -4,8 +4,13 @@ import (
 	"goblog/app/http/middlewares"
 	"goblog/bootstrap"
 	"net/http"
-
+	"goblog/config"
 )
+
+func init() {
+	// 初始化配置信息
+	config.Initialize()
+}
 
 func main() {
 	//初始化数据库和 ORM

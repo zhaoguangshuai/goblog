@@ -5,6 +5,8 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
+	"goblog/pkg/config"
+	"fmt"
 )
 
 // DB gorm.DB 对象
@@ -14,9 +16,20 @@ var DB *gorm.DB
 func ConnectDB() *gorm.DB {
 	var err error
 
+	// 初始化 MySQL 连接信息
+	var (
+		host     = config.GetString("database.mysql.host")
+		port     = config.GetString("database.mysql.port")
+		database = config.GetString("database.mysql.database")
+		username = config.GetString("database.mysql.username")
+		password = config.GetString("database.mysql.password")
+		charset  = config.GetString("database.mysql.charset")
+	)
 	//初始化gorm mysql驱动的配置信息
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%t&loc=%s",
+		username, password, host, port, database, charset, true, "Local")
 	config := mysql.New(mysql.Config{
-		DSN: "root:zgs8653406@tcp(127.0.0.1:3306)/goblog?charset=utf8&parseTime=True&loc=Local",
+		DSN: dsn,
 	})
 
 	//准备数据库连接池
