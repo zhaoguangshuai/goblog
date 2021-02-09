@@ -4,4 +4,4 @@
 
 第二步： cp .env.example .env 并 修改 .env 对应的配置信息
 
-第三步： go run main.go
+第三步： go run main.go 启动服务
